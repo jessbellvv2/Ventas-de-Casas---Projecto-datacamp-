@@ -1,0 +1,486 @@
+House sales
+
+RealAgents is a real estate company that focuses on selling houses.
+
+RealAgents sells a variety of types of house in one metropolitan area.
+
+Some houses sell slowly and sometimes require lowering the price in order to find a buyer.
+
+In order to stay competitive, RealAgents would like to optimize the listing prices of the houses it is trying to sell.
+
+They want to do this by predicting the sale price of a house given its characteristics.
+
+If they can predict the sale price in advance, they can decrease the time to sale.
+
+Data
+The dataset contains records of previous houses sold in the area.
+
+Column Name	Criteria
+house_id	Nominal.
+Unique identifier for houses.
+Missing values not possible.
+city	Nominal.
+The city in which the house is located. One of 'Silvertown', 'Riverford', 'Teasdale' and 'Poppleton'.
+Replace missing values with "Unknown".
+sale_price	Discrete.
+The sale price of the house in whole dollars. Values can be any positive number greater than or equal to zero.
+Remove missing entries.
+sale_date	Discrete.
+The date of the last sale of the house.
+Replace missing values with 2023-01-01.
+months_listed	Continuous.
+The number of months the house was listed on the market prior to its last sale, rounded to one decimal place.
+Replace missing values with mean number of months listed, to one decimal place.
+bedrooms	Discrete.
+The number of bedrooms in the house. Any positive values greater than or equal to zero.
+Replace missing values with the mean number of bedrooms, rounded to the nearest integer.
+house_type	Ordinal.
+One of "Terraced" (two shared walls), "Semi-detached" (one shared wall), or "Detached" (no shared walls).
+Replace missing values with the most common house type.
+area	Continuous.
+The area of the house in square meters, rounded to one decimal place.
+Replace missing values with the mean, to one decimal place.
+Task 1
+The team at RealAgents knows that the city that a property is located in makes a difference to the sale price.
+
+Unfortuntately they believe that this isn't always recorded in the data.
+
+Calculate the number of missing values of the city.
+
+You should use the data in the file "house_sales.csv".
+
+Your output should be an object missing_city, that contains the number of missing values in this column.
+
+
+1
+import pandas as pd
+2
+​
+3
+# Load the dataset, considering "--" as a missing value
+4
+df = pd.read_csv("house_sales.csv", na_values=["--"])
+5
+​
+6
+# Calculate the number of missing values in the "city" column
+7
+missing_city = df["city"].isnull().sum()
+8
+​
+9
+# Display the result
+10
+print("Number of missing values in the 'city' column:", missing_city)
+11
+print(df.columns)
+12
+​
+Number of missing values in the 'city' column: 73
+Index(['house_id', 'city', 'sale_price', 'sale_date', 'months_listed',
+       'bedrooms', 'house_type', 'area'],
+      dtype='object')
+Task 2
+Before you fit any models, you will need to make sure the data is clean.
+
+The table below shows what the data should look like.
+
+Create a cleaned version of the dataframe.
+
+You should start with the data in the file "house_sales.csv".
+
+Your output should be a dataframe named clean_data.
+
+All column names and values should match the table below.
+
+Column Name	Criteria
+house_id	Nominal.
+Unique identifier for houses.
+Missing values not possible.
+city	Nominal.
+The city in which the house is located. One of 'Silvertown', 'Riverford', 'Teasdale' and 'Poppleton'
+Replace missing values with "Unknown".
+sale_price	Discrete.
+The sale price of the house in whole dollars. Values can be any positive number greater than or equal to zero.
+Remove missing entries.
+sale_date	Discrete.
+The date of the last sale of the house.
+Replace missing values with 2023-01-01.
+months_listed	Continuous.
+The number of months the house was listed on the market prior to its last sale, rounded to one decimal place.
+Replace missing values with mean number of months listed, to one decimal place.
+bedrooms	Discrete.
+The number of bedrooms in the house. Any positive values greater than or equal to zero.
+Replace missing values with the mean number of bedrooms, rounded to the nearest integer.
+house_type	Ordinal.
+One of "Terraced", "Semi-detached", or "Detached".
+Replace missing values with the most common house type.
+area	Continuous.
+The area of the house in square meters, rounded to one decimal place.
+Replace missing values with the mean, to one decimal place.
+
+1
+import pandas as pd
+2
+​
+3
+# checked unique values and it showed -- as a value in city, replace to nan
+4
+df = pd.read_csv("house_sales.csv", na_values=["--"])
+5
+​
+6
+# missing values 'city'
+7
+df['city'].fillna("Unknown", inplace=True)
+8
+print("Unique values in 'city' column:", df['city'].unique())
+9
+# missing entries 'sale_price'
+10
+df.dropna(subset=['sale_price'], inplace=True)
+11
+# missing 'sale_date'
+12
+df['sale_date'].fillna("2023-01-01", inplace=True)
+13
+# missing 'months_listed'
+14
+df['months_listed'].fillna(df['months_listed'].mean().round(1), inplace=True)
+15
+print("Unique values in 'months_listed' column:", df['months_listed'].unique())
+16
+# missing 'bedrooms' 
+17
+print("Unique values in 'bedrooms' column:", df['bedrooms'].unique())
+18
+df['bedrooms'].fillna(round(df['bedrooms'].mean()), inplace=True)
+19
+# missing 'house_type' 
+20
+df['house_type'].replace({'Det.': 'Detached', 'Terr.': 'Terraced', 'Semi': 'Semi-detached'}, inplace=True)
+21
+print("Unique values in 'house_type' column:", df['house_type'].unique())
+22
+# missing values 'area' 
+23
+df['area'] = df['area'].str.replace(' sq.m.', '').astype(float)
+24
+df['area'].fillna(df['area'].mean(), inplace=True)
+25
+# make sure area is only float, no strings or nan
+26
+print("is 'area' column float:", df['area'].dtype)
+27
+print("missing values in 'area' column:", df['area'].isna().sum())
+28
+​
+29
+clean_data = df.copy()
+Unique values in 'city' column: ['Silvertown' 'Riverford' 'Teasdale' 'Poppleton' 'Unknown']
+Unique values in 'months_listed' column: [ 5.4  6.3  6.9  6.1  8.7  5.1  5.9  5.8  4.4  3.   4.6  3.7  6.2  5.3
+  3.5  5.   5.5  7.8  4.9  4.7  8.9  3.8  4.8  7.6  6.4  7.9  6.6  4.1
+  7.4  7.1  6.7  3.9  4.3  8.1  6.5  7.7  5.2  2.6  4.2  1.2  8.   5.6
+  3.3  7.3  9.4  8.8  6.   3.6  3.2  8.5  4.5 10.4  9.2  1.7 10.2  0.8
+  5.7  2.   2.3  8.6  7.5  9.6  9.7  6.8  2.2  2.5  4.   8.3 10.7  2.7
+  3.4  7.   9.1  2.8  8.2 11.4 10.   2.9 10.1  7.2 10.5  9.9  3.1  9.3
+  9.   1.3  8.4 11.   1.9 12.3  9.5  2.1  9.8  2.4  0.5 11.5  1.8  1.6
+  1.5 10.8  1.4 11.6 10.3 10.6  0.6 11.3 11.7 11.8  1.1  1.  10.9]
+Unique values in 'bedrooms' column: [2 5 6 4 3]
+Unique values in 'house_type' column: ['Semi-detached' 'Detached' 'Terraced']
+is 'area' column float: float64
+missing values in 'area' column: 0
+Task 3
+The team at RealAgents have told you that they have always believed that the number of bedrooms is the biggest driver of house price.
+
+Producing a table showing the difference in the average sale price by number of bedrooms along with the variance to investigate this question for the team.
+
+You should start with the data in the file 'house_sales.csv'.
+
+Your output should be a data frame named price_by_rooms.
+
+It should include the three columns bedrooms, avg_price, var_price.
+
+Your answers should be rounded to 1 decimal place.
+
+
+1
+import pandas as pd
+2
+​
+3
+df = pd.read_csv("house_sales.csv", na_values=["--"])
+4
+​
+5
+# missing values 'city'
+6
+df['city'].fillna("Unknown", inplace=True)
+7
+print("Unique values in 'city' column:", df['city'].unique())
+8
+# missing entries 'sale_price'
+9
+df.dropna(subset=['sale_price'], inplace=True)
+10
+# missing 'sale_date'
+11
+df['sale_date'].fillna("2023-01-01", inplace=True)
+12
+# missing 'months_listed'
+13
+df['months_listed'].fillna(df['months_listed'].mean().round(1), inplace=True)
+14
+print("Unique values in 'months_listed' column:", df['months_listed'].unique())
+15
+# missing 'bedrooms' 
+16
+print("Unique values in 'bedrooms' column:", df['bedrooms'].unique())
+17
+df['bedrooms'].fillna(round(df['bedrooms'].mean()), inplace=True)
+18
+# missing 'house_type' 
+19
+df['house_type'].replace({'Det.': 'Detached', 'Terr.': 'Terraced', 'Semi': 'Semi-detached'}, inplace=True)
+20
+print("Unique values in 'house_type' column:", df['house_type'].unique())
+21
+# missing values 'area' 
+22
+df['area'] = df['area'].str.replace(' sq.m.', '').astype(float)
+23
+df['area'].fillna(df['area'].mean(), inplace=True)
+24
+# make sure area is only float, no strings or nan
+25
+print("is 'area' column float:", df['area'].dtype)
+26
+print("missing values in 'area' column:", df['area'].isna().sum())
+27
+​
+28
+# calc sale price per bedroom
+29
+price_by_rooms = df.groupby('bedrooms')['sale_price'].agg(['mean', 'var']).round(1).reset_index()
+30
+price_by_rooms.columns = ['bedrooms', 'avg_price', 'var_price']
+31
+​
+32
+price_by_rooms.head()
+33
+​
+Unique values in 'city' column: ['Silvertown' 'Riverford' 'Teasdale' 'Poppleton' 'Unknown']
+Unique values in 'months_listed' column: [ 5.4  6.3  6.9  6.1  8.7  5.1  5.9  5.8  4.4  3.   4.6  3.7  6.2  5.3
+  3.5  5.   5.5  7.8  4.9  4.7  8.9  3.8  4.8  7.6  6.4  7.9  6.6  4.1
+  7.4  7.1  6.7  3.9  4.3  8.1  6.5  7.7  5.2  2.6  4.2  1.2  8.   5.6
+  3.3  7.3  9.4  8.8  6.   3.6  3.2  8.5  4.5 10.4  9.2  1.7 10.2  0.8
+  5.7  2.   2.3  8.6  7.5  9.6  9.7  6.8  2.2  2.5  4.   8.3 10.7  2.7
+  3.4  7.   9.1  2.8  8.2 11.4 10.   2.9 10.1  7.2 10.5  9.9  3.1  9.3
+  9.   1.3  8.4 11.   1.9 12.3  9.5  2.1  9.8  2.4  0.5 11.5  1.8  1.6
+  1.5 10.8  1.4 11.6 10.3 10.6  0.6 11.3 11.7 11.8  1.1  1.  10.9]
+Unique values in 'bedrooms' column: [2 5 6 4 3]
+Unique values in 'house_type' column: ['Semi-detached' 'Detached' 'Terraced']
+is 'area' column float: float64
+missing values in 'area' column: 0
+bedrooms
+avg_price
+var_price
+0
+2
+67076.4
+565289569.7
+1
+3
+154665.1
+2378289076.9
+2
+4
+234704.6
+1725211191.5
+3
+5
+301515.9
+2484327529
+4
+6
+375741.3
+3924432279.5
+Task 4
+Fit a baseline model to predict the sale price of a house.
+
+Fit your model using the data contained in “train.csv”
+
+
+Use “validation.csv” to predict new values based on your model. You must return a dataframe named base_result, that includes house_id and price. The price column must be your predicted values.
+
+
+1
+# Use this cell to write your code for Task 4
+2
+import pandas as pd
+3
+from scipy import stats
+4
+import numpy as np
+5
+import seaborn as sns
+6
+import matplotlib.pyplot as plt
+7
+​
+8
+from sklearn.linear_model import LinearRegression
+9
+from sklearn.preprocessing import StandardScaler
+10
+​
+11
+train = pd.read_csv('train.csv')
+12
+test = pd.read_csv('validation.csv')
+13
+​
+14
+# check corr
+15
+correlation_matrix = train.corr()
+16
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f')
+17
+plt.show()
+18
+​
+19
+sns.pairplot(train)
+20
+plt.show()
+21
+​
+22
+# reg
+23
+X_train = train.drop(['city', 'sale_date', 'sale_price', 'house_id', 'house_type'], axis=1)
+24
+y_train = train['sale_price']
+25
+​
+26
+scaler = StandardScaler()
+27
+X_train_scaled = scaler.fit_transform(X_train)
+28
+model = LinearRegression()
+29
+model.fit(X_train_scaled, y_train)
+30
+X_validation = test[X_train.columns]
+31
+X_validation_scaled = scaler.transform(X_validation)
+32
+y_pred = model.predict(X_validation_scaled)
+33
+​
+34
+compare_result = pd.DataFrame({'house_id': test['house_id'], 'price': y_pred.flatten()})
+35
+print(compare_result)
+36
+​
+37
+​
+
+
+     house_id          price
+0     1331375  118876.064865
+1     1630115  257484.218145
+2     1645745  383988.545816
+3     1336775  117832.366475
+4     1888274  256378.708250
+..        ...            ...
+295   1986255  346927.895640
+296   1896276  365824.062222
+297   1758223  239461.905292
+298   1752010  181628.645653
+299   1651404  353313.370823
+
+[300 rows x 2 columns]
+Task 5
+Fit a comparison model to predict the sale price of a house.
+
+Fit your model using the data contained in “train.csv”
+
+
+Use “validation.csv” to predict new values based on your model. You must return a dataframe named compare_result, that includes house_id and price. The price column must be your predicted values.
+
+
+1
+import pandas as pd
+2
+from sklearn.ensemble import RandomForestRegressor
+3
+​
+4
+# Load the training and validation datasets
+5
+train_data = pd.read_csv("train.csv")
+6
+validation_data = pd.read_csv("validation.csv")
+7
+​
+8
+# Extract features and target variable from the training dataset
+9
+X_train = train_data[['bedrooms', 'months_listed', 'area']]
+10
+y_train = train_data['sale_price']
+11
+​
+12
+# Fit the comparison model (Random Forest) using the training data
+13
+model_compare = RandomForestRegressor(random_state=42)
+14
+model_compare.fit(X_train, y_train)
+15
+​
+16
+# Predict the sale prices on the validation dataset
+17
+X_validation = validation_data[['bedrooms', 'months_listed', 'area']]
+18
+compare_predictions = model_compare.predict(X_validation)
+19
+​
+20
+# Create a dataframe with house_id and predicted prices
+21
+compare_result = pd.DataFrame({'house_id': validation_data['house_id'], 'price': compare_predictions})
+22
+​
+23
+# Display the result
+24
+print(compare_result)
+25
+​
+26
+​
+27
+​
+28
+​
+     house_id      price
+0     1331375  118955.47
+1     1630115  274531.05
+2     1645745  371279.04
+3     1336775  101516.40
+4     1888274  265921.99
+..        ...        ...
+295   1986255  306840.19
+296   1896276  404949.60
+297   1758223  240180.71
+298   1752010  217162.53
+299   1651404  410487.99
+
+[300 rows x 2 columns]
